@@ -3,9 +3,14 @@ import JSONDATA from "./MOCK_DATA.json";
 import "./App.css";
 
 export default function App() {
+  const SearchInputModes = {
+    Immediate: "Immediate",
+    PressEnter: "PressEnter",
+    AfterStop: "AfterStop",
+  };
   return (
     <div className="main">
-      <SearchForm />
+      <SearchForm mode={SearchInputModes.AfterStop} />
     </div>
   );
 }
@@ -14,11 +19,7 @@ class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = { inputText: "" };
-    this.SearchInputModes = {
-      Immediate: "Immediate",
-      PressEnter: "PressEnter",
-      AfterStop: "AfterStop",
-    };
+    this.handler = {};
     this.timeout = 1000;
     this.onSearchHandler = this.onSearchHandler.bind(this);
     this.onEnterHandler = this.onEnterHandler.bind(this);
@@ -40,12 +41,19 @@ class SearchForm extends React.Component {
   }
 
   render() {
+    if (this.props.mode === "Immediate") {
+      this.handler = this.onSearchHandler;
+    } else if (this.props.mode === "PressEnter") {
+      this.handler = this.onEnterHandler;
+    } else if (this.props.mode === "AfterStop") {
+      this.handler = this.onStopHandler;
+    }
     return (
       <div>
         <InputSearch
           placeholder="Search"
-          onSearch={this.onStopHandler}
-          mode={this.SearchInputModes.AfterStop}
+          onSearch={this.handler}
+          mode={this.props.mode}
         />
         <List result={this.state.inputText} />
       </div>
@@ -55,39 +63,17 @@ class SearchForm extends React.Component {
 
 class InputSearch extends React.Component {
   render() {
-    const mode = this.props.mode;
-    if (mode === "Immediate") {
-      return (
-        <div>
-          <input
-            type="text"
-            value={this.inputText}
-            placeholder={this.props.placeholder}
-            onChange={this.props.onSearch}
-          ></input>
-        </div>
-      );
-    } else if (mode === "PressEnter") {
-      return (
-        <div>
-          <input
-            type="text"
-            placeholder={this.props.placeholder}
-            onKeyPress={this.props.onSearch}
-          ></input>
-        </div>
-      );
-    } else if (mode === "AfterStop") {
-      return (
-        <div>
-          <input
-            type="text"
-            placeholder={this.props.placeholder}
-            onChange={this.props.onSearch}
-          ></input>
-        </div>
-      );
-    }
+    const { mode, placeholder, onSearch } = this.props;
+    return (
+      <div>
+        {(mode === "Immediate" || mode === "AfterStop") && (
+          <input type="text" placeholder={placeholder} onChange={onSearch} />
+        )}
+        {mode === "PressEnter" && (
+          <input type="text" placeholder={placeholder} onKeyPress={onSearch} />
+        )}
+      </div>
+    );
   }
 }
 class List extends React.Component {
@@ -99,12 +85,8 @@ class List extends React.Component {
           if (inputText === "") {
             return val;
           } else if (
-            val.first_name
-              .toLocaleLowerCase()
-              .startsWith(inputText.toLocaleLowerCase()) ||
-            val.last_name
-              .toLocaleLowerCase()
-              .startsWith(inputText.toLocaleLowerCase())
+            val.first_name.toLowerCase().startsWith(inputText.toLowerCase()) ||
+            val.last_name.toLowerCase().startsWith(inputText.toLowerCase())
           ) {
             return val;
           }
