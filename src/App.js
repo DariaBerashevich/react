@@ -2,12 +2,13 @@ import React from "react";
 import JSONDATA from "./MOCK_DATA.json";
 import "./App.css";
 
-export default function App() {
-  const SearchInputModes = {
+ const SearchInputModes = {
     Immediate: "Immediate",
     PressEnter: "PressEnter",
     AfterStop: "AfterStop",
   };
+
+export default function App() {
   return (
     <div className="main">
       <SearchForm mode={SearchInputModes.AfterStop} />
@@ -19,21 +20,19 @@ class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = { inputText: "" };
-    this.handler = {};
+    this.handler = () => {};
     this.timeout = 1000;
-    this.onSearchHandler = this.onSearchHandler.bind(this);
-    this.onEnterHandler = this.onEnterHandler.bind(this);
-    this.onStopHandler = this.onStopHandler.bind(this);
+   
   }
-  onSearchHandler(e) {
+  onSearchHandler = (e) => {
     this.setState({ inputText: e.target.value });
   }
-  onEnterHandler(e) {
+  onEnterHandler = (e) => {
     if (e.key === "Enter") {
       this.setState({ inputText: e.target.value });
     }
   }
-  onStopHandler(e) {
+  onStopHandler = (e) => {
     clearTimeout(this.timeout);
     this.timeout = setTimeout(() => {
       this.setState({ inputText: e.target.value });
@@ -41,11 +40,11 @@ class SearchForm extends React.Component {
   }
 
   render() {
-    if (this.props.mode === "Immediate") {
+    if (this.props.mode === SearchInputModes.Immediate) {
       this.handler = this.onSearchHandler;
-    } else if (this.props.mode === "PressEnter") {
+    } else if (this.props.mode === SearchInputModes.PressEnter) {
       this.handler = this.onEnterHandler;
-    } else if (this.props.mode === "AfterStop") {
+    } else if (this.props.mode === SearchInputModes.AfterStop) {
       this.handler = this.onStopHandler;
     }
     return (
@@ -66,10 +65,10 @@ class InputSearch extends React.Component {
     const { mode, placeholder, onSearch } = this.props;
     return (
       <div>
-        {(mode === "Immediate" || mode === "AfterStop") && (
+        {(mode === SearchInputModes.Immediate || mode === SearchInputModes.AfterStop) && (
           <input type="text" placeholder={placeholder} onChange={onSearch} />
         )}
-        {mode === "PressEnter" && (
+        {mode === SearchInputModes.PressEnter && (
           <input type="text" placeholder={placeholder} onKeyPress={onSearch} />
         )}
       </div>
